@@ -1,0 +1,45 @@
+version: '2'
+services:
+  sensor:
+    restart: always
+    build: sensor
+    env_file: sensor.env
+    mem_limit: 2gb
+  tsdb:
+    image: influxdb
+    env_file: influxdb.env
+    volumes:
+      - tsdb:/var/lib/influxdb
+    mem_limit: 2gb
+  proxy:
+    build: proxy
+    ports:
+      - 80:80
+    mem_limit: 2gb
+    volumes:
+      - html:/usr/share/nginx/html:ro
+  tlsproxy:
+    build: tlsproxy
+    ports:
+      - 443:443
+    mem_limit: 2gb
+    volumes:
+      - tls:/etc/letsencrypt/:ro
+  grafana:
+    image: grafana/grafana
+    mem_limit: 2gb
+    env_file: grafana.env
+    volumes:
+      - grafana:/var/lib/grafana
+  tls:
+    build: tls
+    env_file: tls.env
+    mem_limit: 512mb
+    volumes:
+      - html:/usr/share/nginx/html
+      - tls:/etc/letsencrypt/
+volumes:
+  tsdb:
+  grafana:
+  html:
+  tls:
